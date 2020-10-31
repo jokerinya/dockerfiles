@@ -1,0 +1,39 @@
+version: "3.8"
+
+services:
+  mydatabase:
+    image: mysql:5.7
+    restart: always
+    volumes:
+      - mydata:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: somewordpress
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress
+    networks:
+      - mynetwork
+  
+  mywebserver:
+    # If you want to make an image from Dockerfile that your current directory
+    # Add this part instead of image part
+    # build: . 
+    image: wordpress:latest
+    depends_on:
+      - mydatabase
+    ports:
+      - "80:80"
+    environment:
+      WORDPRESS_DB_HOST: mydatabase
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+      WORDPRESS_DB_NAME: wordpress
+    networks:
+      - mynetwork
+
+volumes:
+  mydata:
+
+networks:
+  mynetwork:
+    driver: bridge

@@ -1,0 +1,53 @@
+# Secret usage and workbench connection for wordpress and database
+
+version: "3.7"
+
+services:
+  mymysql:
+    image: mysql:5.7
+    deploy:
+      replicas: 1
+    environment:
+      MYSQL_DATABASE: joker
+      MYSQL_USER: projemaster
+      MYSQL_PASSWORD_FILE: /run/secrets/passwd
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/rootpasswd
+    networks:
+      - odev
+    secrets:
+      - passwd
+      - rootpasswd
+    # You will need if you need to reach with your workbench
+    ports:
+      - 33061:3306
+
+  myweb:
+    image: wordpress:latest
+    depends_on: 
+      - mymysql
+    ports:
+      - 80:80
+    deploy:
+      replicas: 1
+    environment:
+      WORDPRESS_DB_NAME: joker
+      WORDPRESS_DB_USER: projemaster
+      WORDPRESS_DB_PASSWORD_FILE: /run/secrets/passwd
+      WORDPRESS_DB_HOST: mymysql
+    networks: 
+      - odev
+    secrets:
+      - passwd
+
+# Define your passwords on your terminal
+# echo "myp@55w0rd!" > docker sercet create mypassword -
+secrets:
+  rootpasswd:
+    external: true
+  passwd:
+    external: true
+
+networks:
+  odev:
+    driver: overlay
+
